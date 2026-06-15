@@ -13,8 +13,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Go to home after 2 seconds
-    Future.delayed(const Duration(seconds: 2), () {
+    // Go to home after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) context.go('/home');
     });
   }

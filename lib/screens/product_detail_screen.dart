@@ -14,161 +14,220 @@ class ProductDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.bg,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: const Text('Product Detail',
-            style: TextStyle(
-                color: AppColors.dark,
-                fontWeight: FontWeight.w700,
-                fontSize: 18)),
-        leading: GestureDetector(
-          onTap: () => context.go('/search'),
-          child: Container(
-            margin: const EdgeInsets.only(left: 16),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)
-              ],
-            ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: AppColors.dark, size: 16),
-          ),
-        ),
-        actions: [
-          // Edit button
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
-            onPressed: () =>
-                context.go('/update-product', extra: product),
-          ),
-          // Delete button
-          IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-            onPressed: () async {
-              await ref
-                  .read(deleteProductProvider.notifier)
-                  .deleteProduct(product.id);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: const Text('Product deleted'),
-                  backgroundColor: AppColors.error,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ));
-                context.go('/home');
-              }
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.network(
-                product.thumbnail,
-                width: double.infinity,
-                height: 240,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: double.infinity,
-                  height: 240,
-                  color: AppColors.bg,
-                  child: const Icon(Icons.image_not_supported_outlined,
-                      color: AppColors.muted, size: 40),
+      body: CustomScrollView(
+        slivers: [
+          // ── Sliver App Bar — image expands/collapses ──
+          SliverAppBar(
+            backgroundColor: AppColors.bg,
+            expandedHeight: 280,
+            pinned: true,
+
+            // Back button
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 16, top: 8),
+              child: GestureDetector(
+                onTap: () => context.go('/home'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8)
+                    ],
+                  ),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: AppColors.dark, size: 16),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
 
-            // Title
-            Text(product.title,
-                style: const TextStyle(
+            // Edit / Delete actions
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8)
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit_outlined,
+                        color: AppColors.primary, size: 18),
+                    onPressed: () =>
+                        context.go('/update-product', extra: product),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, right: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8)
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded,
+                        color: Colors.red, size: 18),
+                    onPressed: () async {
+                      await ref
+                          .read(deleteProductProvider.notifier)
+                          .deleteProduct(product.id);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: const Text('Product deleted'),
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ));
+                        context.go('/home');
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+
+            flexibleSpace: FlexibleSpaceBar(
+              background: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
+                child: Image.network(
+                  product.thumbnail,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: AppColors.bg,
+                    child: const Icon(Icons.image_not_supported_outlined,
+                        color: AppColors.muted, size: 40),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ── Sliver Content ────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.all(20),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Title
+                Text(
+                  product.title,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.dark)),
-            const SizedBox(height: 8),
-
-            // Category + Rating
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.dark,
                   ),
-                  child: Text(product.category,
-                      style: const TextStyle(
+                ),
+                const SizedBox(height: 8),
+
+                // Category + Rating
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        product.category,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.primary,
-                          fontWeight: FontWeight.w500)),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(Icons.star_rounded,
+                        color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${product.rating}',
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.muted),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                const SizedBox(width: 4),
-                Text('${product.rating}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.muted)),
-              ],
-            ),
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // Price
-            Text('\$${product.price}',
-                style: const TextStyle(
+                // Price
+                Text(
+                  '\$${product.price}',
+                  style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary)),
-            const SizedBox(height: 16),
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-            // Description
-            const Text('Description',
-                style: TextStyle(
+                // Description
+                const Text(
+                  'Description',
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.dark)),
-            const SizedBox(height: 6),
-            Text(product.description,
-                style: const TextStyle(
-                    fontSize: 13, color: AppColors.muted, height: 1.6)),
-            const SizedBox(height: 16),
+                    color: AppColors.dark,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  product.description,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.muted,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-            // Stock, Brand, Discount info
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04), blurRadius: 12)
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _infoItem('Stock', '${product.stock}'),
-                  _infoItem('Brand', product.brand),
-                  _infoItem('Discount', '${product.discountPercentage}%'),
-                ],
-              ),
+                // Stock, Brand, Discount
+                Container(
+                  width: double.infinity,
+                  height: 400,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 12,
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _infoItem('Stock', '${product.stock}'),
+                      _infoItem('Brand', product.brand),
+                      _infoItem('Discount', '${product.discountPercentage}%'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+              ]),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

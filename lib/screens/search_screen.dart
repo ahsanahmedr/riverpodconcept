@@ -109,21 +109,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-
-                // Search button
-                GestureDetector(
-                  onTap: _onSearch,
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.search_rounded,
-                        color: Colors.white, size: 22),
-                  ),
-                ),
               ],
             ),
           ),
